@@ -11,7 +11,8 @@ typedef enum {
     TOKEN_DEFAULT,       /* default */
     TOKEN_DO,            /* do */
     TOKEN_DOUBLE,        /* double */
-    TOKEN_ELSE,          /* else */
+    TOKEN_ELSE,  
+    TOKEN_ELSEIF,        /* else */
     TOKEN_ENUM,          /* enum */
     TOKEN_EXTERN,        /* extern */
     TOKEN_FLOAT,         /* float */
@@ -34,10 +35,11 @@ typedef enum {
     TOKEN_VOID,          /* void */
     TOKEN_VOLATILE,      /* volatile */
     TOKEN_WHILE,         /* while */
+    TOKEN_INLINE,
 
     /* Identifiers and literals */
     TOKEN_IDENTIFIER,    /* variable / function / type names */
-    TOKEN_INTEGER_CONST, /* e.g., 123, 0x1A, 077 */
+    TOKEN_INT_CONST, /* e.g., 123, 0x1A, 077 */
     TOKEN_FLOAT_CONST,   /* e.g., 3.14, 0.5e-2, .5F */
     TOKEN_CHAR_CONST,    /* e.g., 'a', '\n' */
     TOKEN_STRING_LITERAL,/* e.g., "hello" */

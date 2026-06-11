@@ -94,7 +94,7 @@ static Token* scan_integer(Lexer* lex, const char* start) {
 
 
     int len = (lex->source + lex->cursor) - start;
-    lex->current_token = (Token){TOKEN_INTEGER_CONST, start, len, lex->line};
+    lex->current_token = (Token){TOKEN_INT_CONST, start, len, lex->line};
     return &lex->current_token;
 }
 
@@ -179,6 +179,7 @@ static Token* scan_identifier(Lexer* lex, const char* start) {
         case 7:
             if (strncmp(start, "default", 7) == 0) type = TOKEN_DEFAULT;
             else if (strncmp(start, "typedef", 7) == 0) type = TOKEN_TYPEDEF;
+            else if (strncmp(start, "else if", 7) == 0) type = TOKEN_ELSEIF;
             break;
         case 8:
             if (strncmp(start, "continue", 8) == 0) type = TOKEN_CONTINUE;
@@ -372,7 +373,7 @@ Token* next_token(Lexer* lex) {
                 lex->cursor++;
             scan_integer(lex, start);
             int len = (lex->source + lex->cursor) - start;  
-            lex->current_token = (Token){TOKEN_INTEGER_CONST, start, len, lex->line};
+            lex->current_token = (Token){TOKEN_INT_CONST, start, len, lex->line};
             return &lex->current_token;
         }
         /* decimal or octal */
@@ -393,7 +394,7 @@ Token* next_token(Lexer* lex) {
         } else {
             scan_integer(lex, start);
             int len = (lex->source + lex->cursor) - start;   /* FIX */
-            lex->current_token = (Token){TOKEN_INTEGER_CONST, start, len, lex->line};
+            lex->current_token = (Token){TOKEN_INT_CONST, start, len, lex->line};
             return &lex->current_token;
         }
     }

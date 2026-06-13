@@ -31,5 +31,9 @@ CstNode* parse_if_statement(Parser* p);
 CstNode* parse_while_statement(Parser* p);
 CstNode* parse_return_statement(Parser* p);
 CstNode* parse_expression(Parser* p);
+CstNode* parse_declaration(Parser* p);
+CstNode* parse_for_statement(Parser* p);
+CstNode* parse_do_while_statement(Parser* p);
+CstNode* parse_jump_statement(Parser* p);
 
 #endif

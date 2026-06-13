@@ -179,7 +179,6 @@ static Token* scan_identifier(Lexer* lex, const char* start) {
         case 7:
             if (strncmp(start, "default", 7) == 0) type = TOKEN_DEFAULT;
             else if (strncmp(start, "typedef", 7) == 0) type = TOKEN_TYPEDEF;
-            else if (strncmp(start, "else if", 7) == 0) type = TOKEN_ELSEIF;
             break;
         case 8:
             if (strncmp(start, "continue", 8) == 0) type = TOKEN_CONTINUE;

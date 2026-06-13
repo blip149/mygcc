@@ -11,8 +11,7 @@ typedef enum {
     TOKEN_DEFAULT,       /* default */
     TOKEN_DO,            /* do */
     TOKEN_DOUBLE,        /* double */
-    TOKEN_ELSE,  
-    TOKEN_ELSEIF,        /* else */
+    TOKEN_ELSE,         /* else */
     TOKEN_ENUM,          /* enum */
     TOKEN_EXTERN,        /* extern */
     TOKEN_FLOAT,         /* float */

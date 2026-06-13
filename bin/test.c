@@ -1,6 +1,7 @@
-int main(void) {
-    if (1)
-        return 0;
-    while (0) {}
-    return 1;
+int main() {
+    int x;
+    if (x) {
+        return 1;
+    }
+    return 0;
 }

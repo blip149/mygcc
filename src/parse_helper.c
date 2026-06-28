@@ -83,6 +83,10 @@ CstKind cst_kind_token_match(TokenType type) {
         case TOKEN_NE_OP:          return CST_NE_OP;
         case TOKEN_AND_OP:         return CST_AND_OP;
         case TOKEN_OR_OP:          return CST_OR_OP;
+        case TOKEN_PLUS_EQUAL:     return CST_PLUS_EQUAL;
+        case TOKEN_STAR_EQUAL:     return CST_STAR_EQUAL;
+        case TOKEN_SLASH_EQUAL:    return CST_SLASH_EQUAL;
+        case TOKEN_MINUS_EQUAL:    return CST_MINUS_EQUAL;
 
         case TOKEN_EOF:            return CST_EOF;
         case TOKEN_ERROR:          return CST_ERROR;

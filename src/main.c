@@ -55,7 +55,7 @@ int main(int argc, char* argv[]) {
     if (parser.has_error) {
         printf("Compilation finished with errors.\n");
     } else {
-        printf("Compilation finished successfully.\n");
+        cst_print(ast_root, 0);
     }
 
     cst_free(ast_root);
@@ -63,6 +63,6 @@ int main(int argc, char* argv[]) {
 
     return parser.has_error ? 1 : 0;
 }
-    //  gcc -Wall -Wextra -Isrc/include -g src/lexer.c src/main.c src/cst.c src/parser.c src/parse_helper.c -o bin/mygcc.exe
+    //  gcc -Wall -Wextra -Isrc/include -g src/lexer.c src/main.c src/cst.c src/parser.c src/parse_helper.c src/pratt.c -o bin/mygcc.exe
     // gcc -E -std=c99 
 

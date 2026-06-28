@@ -3,7 +3,7 @@
 
 #include "lexer.h"
 
-typedef enum {
+typedef enum{
     CST_TRANSLATION_UNIT,
     CST_EXTERNAL_DECLARATION,
     CST_FUNCTION_DEFINITION,
@@ -39,6 +39,7 @@ typedef enum {
     CST_PRIMARY_EXPR,
     CST_POSTFIX_EXPR,
     CST_ARGUMENT_LIST,
+    CST_BINARY_EXPR,
     CST_UNARY_EXPR,
     CST_CAST_EXPR,
     CST_MULTIPLICATIVE_EXPR,
@@ -78,7 +79,7 @@ typedef enum {
     CST_HAT, CST_PIPE, CST_QUESTION, CST_COLON, CST_EQUALS,
     CST_ELLIPSIS, CST_ARROW, CST_INCREMENT, CST_DECREMENT, CST_LEFT_SHIFT,
     CST_RIGHT_SHIFT, CST_LE_OP, CST_GE_OP, CST_EQ_OP, CST_NE_OP,
-    CST_AND_OP, CST_OR_OP,
+    CST_AND_OP, CST_OR_OP, CST_MINUS_EQUAL, CST_PLUS_EQUAL, CST_STAR_EQUAL, CST_SLASH_EQUAL,
     CST_EOF,
     CST_ERROR
 } CstKind;
@@ -114,5 +115,9 @@ void cst_add_child(CstNode* parent, CstNode* child);
 
 
 void cst_free(CstNode* node);
+
+void cst_print(CstNode* node, int depth);
+
+const char* cst_kind_name(CstKind kind);
 
 #endif

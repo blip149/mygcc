@@ -82,6 +82,10 @@ typedef enum {
     TOKEN_NE_OP,         /* != */
     TOKEN_AND_OP,        /* && */
     TOKEN_OR_OP,         /* || */
+    TOKEN_PLUS_EQUAL,    // += 
+    TOKEN_MINUS_EQUAL,   // -=
+    TOKEN_STAR_EQUAL,    //  *=
+    TOKEN_SLASH_EQUAL,   // /=
 
     TOKEN_EOF,           /* End of File / Input */
     TOKEN_ERROR          /* For handling lexical errors safely */

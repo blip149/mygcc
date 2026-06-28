@@ -35,5 +35,8 @@ CstNode* parse_declaration(Parser* p);
 CstNode* parse_for_statement(Parser* p);
 CstNode* parse_do_while_statement(Parser* p);
 CstNode* parse_jump_statement(Parser* p);
+CstNode* parse_nud(Parser* p);
+CstNode* parse_led(Parser* p, Token op, CstNode* left);
+CstNode* parse_expr(Parser* p, int min_bp);
 
 #endif

@@ -1,4 +1,5 @@
 #include "include/parser.h"
+#include "include/pratt.h"
 
 
 void parser_init(Parser* parser, Lexer* lex) {
@@ -56,7 +57,6 @@ CstNode* parse_translation_unit(Parser* p) {
     }
     return node;
 }
-
 
 
 CstNode* parse_external_declaration(Parser* p) {
@@ -360,12 +360,7 @@ CstNode* parse_jump_statement(Parser* p) {
 
 
 CstNode* parse_expression(Parser* p) {
-    while (!check_parser(p, TOKEN_SEMICOLON) &&
-           !check_parser(p, TOKEN_RPAREN) &&
-           !check_parser(p, TOKEN_RBRACE) &&
-           !check_parser(p, TOKEN_EOF))
-        advance_parse(p);
-    return cst_make_terminal(CST_ERROR, "expr_stub", 9, p->current.line);
+    return parse_expr(p, BP_NONE);
 }
 
 CstNode* parse_expression_statement(Parser* p) {
@@ -379,4 +374,180 @@ CstNode* parse_expression_statement(Parser* p) {
         p->has_error = true;
     }
     return node;
+}
+
+CstNode* parse_nud(Parser* p) {
+    if (!p) return NULL;
+
+    Token t = parser_consume(p);
+    CstKind kind = cst_kind_token_match(t.type);
+
+    switch (t.type) {
+        case TOKEN_INT_CONST:  return cst_make_terminal(kind, t.start, t.length, t.line);
+        case TOKEN_FLOAT_CONST: return cst_make_terminal(kind, t.start, t.length, t.line);
+        case TOKEN_CHAR_CONST:  return  cst_make_terminal(kind, t.start, t.length, t.line);
+        case TOKEN_STRING_LITERAL: return cst_make_terminal(kind, t.start, t.length, t.line);
+
+        case TOKEN_IDENTIFIER:     return cst_make_terminal(kind, t.start, t.length, t.line);
+
+        case TOKEN_LPAREN: {
+            CstNode* inner = parse_expr(p, BP_NONE);
+            if (!check_parser(p, TOKEN_RPAREN)){
+                fprintf(stderr, "Line %d: Expected ')'\n", p->current.line);
+                p->has_error = true;
+            }else{
+                parser_consume(p);
+            }
+            return inner;
+        }
+
+        case TOKEN_MINUS:
+        case TOKEN_EXCLAM:
+        case TOKEN_TILDE:
+        case TOKEN_AMPERSAND:
+        case TOKEN_ASTERISK:
+        case TOKEN_INCREMENT:
+        case TOKEN_DECREMENT:  {
+            CstNode* operand = parse_expr(p, BP_UNARY);
+            CstNode* node = cst_make_rule(CST_UNARY_EXPR,t.line);
+            cst_add_child(node, cst_make_terminal(kind, t.start, t.length, t.line));
+            cst_add_child(node, operand);
+            return node;
+        }
+
+        default: {
+            fprintf(stderr, "Line %d: Unexpected token in expression\n", t.line);
+            return cst_make_rule(CST_ERROR, t.line);
+        }
+    }
+}
+
+CstNode* parse_led(Parser* p, Token op, CstNode* left) {
+    switch (op.type) {
+
+        case TOKEN_PLUS:
+        case TOKEN_MINUS:
+        case TOKEN_ASTERISK:
+        case TOKEN_SLASH:
+        case TOKEN_PERCENT:
+        case TOKEN_EQ_OP:
+        case TOKEN_NE_OP:
+        case TOKEN_LESS:
+        case TOKEN_GREATER:
+        case TOKEN_LE_OP:
+        case TOKEN_GE_OP:
+        case TOKEN_AND_OP:
+        case TOKEN_OR_OP:
+        case TOKEN_PIPE:
+        case TOKEN_HAT:
+        case TOKEN_AMPERSAND:
+        case TOKEN_LEFT_SHIFT:
+        case TOKEN_RIGHT_SHIFT: {
+            CstNode* right = parse_expr(p, get_lbp(op.type));
+
+            CstNode* node = cst_make_rule(CST_BINARY_EXPR, op.line);
+            cst_add_child(node, left);
+            cst_add_child(node, cst_make_terminal(cst_kind_token_match(op.type),
+                                                   op.start, op.length, op.line));
+            cst_add_child(node, right);
+            return node;
+        }
+
+        case TOKEN_EQUALS:
+        case TOKEN_PLUS_EQUAL:
+        case TOKEN_MINUS_EQUAL:
+        case TOKEN_STAR_EQUAL:
+        case TOKEN_SLASH_EQUAL: {
+
+            CstNode* right = parse_expr(p, BP_ASSIGN - 1);
+
+            CstNode* node = cst_make_rule(CST_ASSIGNMENT_EXPR, op.line);
+            cst_add_child(node, left);
+            cst_add_child(node, cst_make_terminal(cst_kind_token_match(op.type),
+                                                   op.start, op.length, op.line));
+            cst_add_child(node, right);
+            return node;
+        }
+
+        case TOKEN_LPAREN: {
+            CstNode* node = cst_make_rule(CST_POSTFIX_EXPR, op.line);
+            cst_add_child(node, left);
+
+            CstNode* args = cst_make_rule(CST_ARGUMENT_LIST, op.line);
+            if (!check_parser(p, TOKEN_RPAREN)) {
+                cst_add_child(args, parse_expr(p, BP_ASSIGN));
+                while (check_parser(p, TOKEN_COMMA)) {
+                    parser_consume(p);
+                    cst_add_child(args, parse_expr(p, BP_ASSIGN));
+                }
+            }
+            cst_add_child(node, args);
+
+            if (!check_parser(p, TOKEN_RPAREN)) {
+                fprintf(stderr, "Line %d: Expected ')' after arguments\n", p->current.line);
+                p->has_error = true;
+            } else {
+                parser_consume(p);
+            }
+            return node;
+        }
+
+
+        case TOKEN_LBRACKET: {
+            CstNode* index = parse_expr(p, BP_NONE);
+
+            if (!check_parser(p, TOKEN_RBRACKET)) {
+                fprintf(stderr, "Line %d: Expected ']' after index\n", p->current.line);
+                p->has_error = true;
+            } else {
+                parser_consume(p);
+            }
+
+            CstNode* node = cst_make_rule(CST_POSTFIX_EXPR, op.line);
+            cst_add_child(node, left);
+            cst_add_child(node, index);
+            return node;
+        }
+
+        case TOKEN_DOT:
+        case TOKEN_ARROW: {
+            CstNode* node = cst_make_rule(CST_POSTFIX_EXPR, op.line);
+            cst_add_child(node, left);
+            cst_add_child(node, cst_make_terminal(cst_kind_token_match(op.type),
+                                                   op.start, op.length, op.line));
+
+            if (check_parser(p, TOKEN_IDENTIFIER)) {
+                Token field = parser_consume(p);
+                cst_add_child(node, cst_make_terminal(CST_IDENTIFIER,
+                                                       field.start, field.length, field.line));
+            } else {
+                fprintf(stderr, "Line %d: Expected field name\n", p->current.line);
+                p->has_error = true;
+            }
+            return node;
+        }
+
+        case TOKEN_INCREMENT:
+        case TOKEN_DECREMENT: {
+            CstNode* node = cst_make_rule(CST_POSTFIX_EXPR, op.line);
+            cst_add_child(node, left);
+            cst_add_child(node, cst_make_terminal(cst_kind_token_match(op.type),
+                                                   op.start, op.length, op.line));
+            return node;
+        }
+
+        default:
+            fprintf(stderr, "Line %d: Unexpected operator in expression\n", op.line);
+            return left;
+    }
+}
+
+CstNode* parse_expr(Parser* p, int min_bp) {
+    CstNode* left = parse_nud(p);
+
+    while(get_lbp(p->current.type ) > min_bp){
+        Token op = parser_consume(p);
+        left = parse_led(p, op, left);
+    }
+    return left;
 }

@@ -253,6 +253,10 @@ Token* next_token(Lexer* lex) {
                     lex->current_token = (Token){TOKEN_INCREMENT, &lex->source[lex->cursor], 2, lex->line};
                     lex->cursor += 2;
                     return &lex->current_token;
+                } else if (next == '=') {
+                    lex->current_token = (Token) {TOKEN_PLUS_EQUAL, &lex->source[lex->cursor], 2, lex->line};
+                    lex->cursor += 2;
+                    return &lex->current_token;
                 }
                 break;
             case '-':
@@ -262,6 +266,10 @@ Token* next_token(Lexer* lex) {
                     return &lex->current_token;
                 } else if (next == '>') {
                     lex->current_token = (Token){TOKEN_ARROW, &lex->source[lex->cursor], 2, lex->line};
+                    lex->cursor += 2;
+                    return &lex->current_token;
+                } else if (next == '=') {
+                    lex->current_token = (Token){TOKEN_MINUS_EQUAL, &lex->source[lex->cursor], 2, lex->line};
                     lex->cursor += 2;
                     return &lex->current_token;
                 }
@@ -320,6 +328,20 @@ Token* next_token(Lexer* lex) {
                 if (next == '.' && lex->cursor + 2 < lex->length && lex->source[lex->cursor + 2] == '.') {
                     lex->current_token = (Token){TOKEN_ELLIPSIS, &lex->source[lex->cursor], 3, lex->line};
                     lex->cursor += 3;
+                    return &lex->current_token;
+                }
+                break;
+            case '*': 
+                if (next == '=') {
+                    lex->current_token = (Token){TOKEN_STAR_EQUAL, &lex->source[lex->cursor-1], 2, lex->line}; 
+                    lex->cursor += 2;
+                    return &lex->current_token;
+                }
+                break;
+            case '/':
+                if (next == '=') {
+                    lex->current_token = (Token){TOKEN_SLASH_EQUAL, &lex->source[lex->cursor], 2, lex->line};
+                    lex->cursor += 2;
                     return &lex->current_token;
                 }
                 break;
